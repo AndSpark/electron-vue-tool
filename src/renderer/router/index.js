@@ -1,60 +1,24 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import About from '../views/About.vue'
-import Help from '../views/Help.vue'
-import Home from '../views/Home.vue'
 
 Vue.use(Router)
-
-const router = new Router({
+const Home = () => import('@/view/Home')
+const ImgResize = () => import('@/tool/imgResize/g-imgResize')
+export default new Router({
   routes: [
     {
       path: '/',
-      redirect: '/home',
-    },
-    {
-      path: '/home',
-      meta: {
-        title: 'Home',
-        icon: 'fa-home',
-      },
       component: Home,
+      name: 'Application',
     },
     {
-      path: '/about',
-      meta: {
-        title: 'About',
-        icon: 'fa-info-circle',
-      },
-      component: About,
-    },
-    {
-      path: '/help',
-      meta: {
-        title: 'Help',
-        icon: 'fa-info-circle',
-      },
-      component: Help,
+      path: '/imgresize',
+      component: ImgResize,
+      name: '图片处理工具',
     },
     {
       path: '*',
-      redirect: '/home',
+      redirect: '/',
     },
   ],
 })
-
-// dynamically set application title to current view
-router.afterEach((to) => {
-  let title =
-    to.path === '/home'
-      ? process.env.PRODUCT_NAME
-      : `${to.meta.title} - ${process.env.PRODUCT_NAME}`
-
-  if (!title) {
-    title = 'Home'
-  }
-
-  document.title = title
-})
-
-export default router

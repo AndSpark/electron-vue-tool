@@ -1,0 +1,154 @@
+$gray: rgba(0, 0, 0, .125);
+$red:#DF0031;
+$blue:#007bff;
+$blue2:#3579B7;
+$green:#23ba85;
+$orange:#FF6229;
+$main:#007bff;
+$btn:#ff6229;
+$btnh:#23ba85;
+$list:#ff6229;
+$card:#007bff;
+$swiper:#DF0031;
+$form:#007bff;
+$breadcrumb:linear-gradient(120deg, #e4acb9 0%, #df0031 100%);
+$preloader:#007bff;
+
+@mixin border($color) {
+  border: 1px solid $color;
+}
+
+@mixin border-b($color) {
+  border-bottom: 1px solid $color;
+}
+
+@mixin border-t($color) {
+  border-top: 1px solid $color;
+}
+
+@mixin border-r($color) {
+  border-right: 1px solid $color;
+}
+
+@mixin border-l($color) {
+  border-left: 1px solid $color;
+}
+
+@mixin box-s($color) {
+  box-shadow: 2px 2px 2px 2px $color;
+}
+
+
+@mixin hover-bg($bg) {
+  & {
+    position: relative;
+  }
+
+  &:hover {
+    &::after {
+      width: 100%;
+    }
+  }
+
+  &::after {
+    z-index: -1;
+    opacity: 0.8;
+    transition: 0.4s;
+    display: block;
+    position: absolute;
+    content: '';
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: $bg;
+  }
+}
+
+@mixin btn-anim($color) {
+  position: relative;
+
+  &::after {
+    position: absolute;
+    content: "";
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 100%;
+    background-color: $color;
+    transition: 0.3s;
+  }
+
+  &:hover::after {
+    width: 100%;
+  }
+}
+
+@mixin anim-b-b($color) {
+  position: relative;
+
+  &:hover::after {
+    position: absolute;
+    content: '';
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 5px;
+    background-color: $color;
+    animation: anim-b-b .5s forwards;
+    z-index: -1;
+  }
+
+  @keyframes anim-b-b {
+    0% {
+      width: 0;
+    }
+
+    100% {
+      width: 100%;
+    }
+  }
+}
+
+@mixin anim-bgc($color) {
+  position: relative;
+  z-index: 9;
+
+  &:hover::after {
+    z-index: -1;
+    position: absolute;
+    content: '';
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background-color: $color;
+    animation: anim-bgc .5s forwards;
+  }
+
+
+  @keyframes anim-bgc {
+    0% {
+      width: 0;
+    }
+
+    100% {
+      width: 100%;
+    }
+  }
+}
+
+@mixin anim-opc {
+  animation: anim-opc .3s forwards;
+
+  @keyframes anim-opc {
+    0% {
+      opacity: .5;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+}

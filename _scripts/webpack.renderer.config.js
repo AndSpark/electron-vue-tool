@@ -13,7 +13,7 @@ const {
 
 const externals = Object.keys(dependencies).concat(Object.keys(devDependencies))
 const isDevMode = process.env.NODE_ENV === 'development'
-const whiteListedModules = ['vue']
+const whiteListedModules = ['vue', 'vuetify']
 
 const config = {
   name: 'renderer',
@@ -56,7 +56,7 @@ const config = {
         loader: 'vue-loader',
       },
       {
-        test: /\.s(c|a)ss$/,
+        test: /\.scss$/,
         use: [
           {
             loader: MiniCssExtractPlugin.loader,
@@ -72,6 +72,36 @@ const config = {
             options: {
               // eslint-disable-next-line
               implementation: require('sass'),
+              indentedSyntax: true, // optional
+            },
+            options: {
+              implementation: require('sass'),
+              sassOptions: {
+                indentedSyntax: true, // optional
+              },
+            },
+          },
+          {
+            loader: 'sass-resources-loader',
+            options: {
+              resources: [
+                path.resolve(
+                  __dirname,
+                  '../src/renderer/assets/style/mixin.scss'
+                ),
+                path.resolve(
+                  __dirname,
+                  '../src/renderer/assets/style/normalize.css'
+                ),
+                path.resolve(
+                  __dirname,
+                  '../src/renderer/assets/style/common.scss'
+                ),
+                path.resolve(
+                  __dirname,
+                  '../src/renderer/assets/style/iconfont.css'
+                ),
+              ],
             },
           },
         ],
@@ -87,6 +117,10 @@ const config = {
           },
           'css-loader',
         ],
+      },
+      {
+        test: /\.pug$/,
+        loader: 'pug-plain-loader',
       },
       {
         test: /\.(png|jpe?g|gif|tif?f|bmp|webp|svg)(\?.*)?$/,
@@ -138,7 +172,7 @@ const config = {
   resolve: {
     alias: {
       vue$: 'vue/dist/vue.common.js',
-      '@': path.join(__dirname, '../src/'),
+      '@': path.join(__dirname, '../src/renderer/'),
       src: path.join(__dirname, '../src/'),
       icons: path.join(__dirname, '../_icons/'),
     },

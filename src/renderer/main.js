@@ -1,11 +1,8 @@
-import 'bulma-fluent/bulma.sass'
-import 'material-design-icons/iconfont/material-icons.css'
 import Vue from 'vue'
 import App from './App.vue'
-import './assets/style/animations.scss'
-import './assets/style/main.scss'
 import router from './router/index'
 import store from './store/index'
+import vuetify from '@/plugins/vuetify'
 
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -18,6 +15,7 @@ new Vue({
   el: '#app',
   router,
   store,
+  vuetify,
   render: (h) => h(App),
 })
 
