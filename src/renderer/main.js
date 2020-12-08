@@ -3,7 +3,7 @@ import App from './App.vue'
 import router from './router/index'
 import store from './store/index'
 import vuetify from '@/plugins/vuetify'
-
+import './assets/js/smoothscroll'
 const isDev = process.env.NODE_ENV === 'development'
 
 Vue.config.devtools = isDev

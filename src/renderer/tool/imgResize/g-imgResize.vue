@@ -12,9 +12,10 @@ rounded) 开始处理
           v-progress-circular(color="green" indeterminate v-if="isSharping")
           v-btn.mx-4(color="#C8E6C9" rounded v-if="allDone" @click="handleImgSave")
             span(style='color:#444') 保存并覆盖
-          v-btn(color="#EF9A9A" rounded v-if="allDone") 
+          v-btn(color="#EF9A9A" rounded v-if="allDone" @click="handleImgBack") 
             span(style='color:#444') 撤回
           v-snackbar(v-model="isImgSave" centered timeout="3000") 图片保存成功！
+          v-snackbar(v-model="isAllPicked" centered timeout="3000") 目前不支持单选操作！
         v-row.pb-16
           v-col(v-for="(img,i) in showImgList" :key="img.name" :cols="4" )
             v-card
@@ -53,6 +54,7 @@ rounded) 开始处理
               v-slider(v-model="compress" :max="100" :min="0" label="压缩比" class="align-center vslider")
                 template(v-slot:append)
                   v-text-field(v-model="compress" type="number" class="mt-0 pt-0" style="width: 60px;")
+              v-checkbox(v-model="isPngCompress" label="PNG格式压缩(生成JPG格式)")
 </template>
 
 <script>
@@ -67,8 +69,8 @@ export default {
   data() {
     return {
       imgList: [],
-      showImgList:[],
-      sharpImgList:[],
+      showImgList: [],
+      sharpImgList: [],
       rate: 1,
       rateOnce: false,
       width: 600,
@@ -77,9 +79,11 @@ export default {
       compress: 80,
       tailorStatus: true,
       compressStatus: true,
-      isSharping:false,
-      isImgSave:false,
+      isSharping: false,
+      isImgSave: false,
+      isPngCompress: false,
       allDone: false,
+      isAllPicked: false,
     }
   },
   computed: {},
@@ -141,9 +145,12 @@ export default {
       }
       this.isSharping = true
       this.imgList.forEach((img, i) => {
-        let { ext } = path.parse(img.path)
+        let { ext, name } = path.parse(img.path)
         if (this.tailorStatus && this.compressStatus) {
-          if (ext.match(/jpe?g/)) {
+          if (ext.match(/jpe?g/) || this.isPngCompress) {
+            if (img.path.includes('png')) {
+              img.path = img.path.replace('png', 'jpg')
+            }
             sharp(img.data)
               .resize({
                 width: Number(this.width),
@@ -155,55 +162,96 @@ export default {
                 quality: Number((this.compress / 2).toFixed(0)),
                 chromaSubsampling: '4:4:4',
               })
-              .toBuffer((err,data,info) => {
+              .toBuffer((err, data, info) => {
+                this.sharpImgList.push({
+                  name: name + '.jpg',
+                  path: img.path,
+                  info,
+                  data,
+                })
+                this.$set(this.showImgList, i, {
+                  name: name + '.jpg',
+                  path: img.path,
+                  info,
+                  color: '#C8E6C9',
+                })
+                if (this.sharpImgList.length === this.imgList.length) {
+                  this.allDone = true
+                  this.isSharping = false
+                }
+              })
+          } else {
+            sharp(img.data)
+              .resize({
+                width: Number(this.width),
+                height: Number(this.height),
+                fit: 'contain',
+                backround: { r: 0, g: 0, b: 0, alpha: 0 },
+              })
+              .toBuffer((err, data, info) => {
                 this.sharpImgList.push({
                   name: img.name,
                   path: img.path,
                   info,
                   data,
                 })
-                  this.$set(this.showImgList,i,{
+                this.$set(this.showImgList, i, {
                   name: img.name,
                   path: img.path,
                   info,
                   color: '#C8E6C9',
+                })
+                if (this.sharpImgList.length === this.imgList.length) {
+                  this.allDone = true
+                  this.isSharping = false
                 }
-                )
-                if(this.sharpImgList.length === this.imgList.length){
-              this.allDone = true
-              this.isSharping = false
-            }
               })
-
-            
           }
+        } else {
+          this.isAllPicked = true
+          this.isSharping = false
+          setTimeout(() => {
+            this.isAllPicked = false
+          }, 3000)
         }
       })
     },
-    handleImgSave(){
+    handleImgSave() {
       let count = this.sharpImgList.length
-      this.sharpImgList.forEach((img,i) => {
-        fs.writeFileSync(img.path,img.data,err => {
-          if(err)console.log(err);
+      this.sharpImgList.forEach((img, i) => {
+        fs.writeFileSync(img.path, img.data, (err) => {
+          if (err) console.log(err)
         })
         count--
-        if(count == 0){
+        if (count == 0) {
           this.isImgSave = true
           this.resetData()
         }
       })
     },
-    resetData(){
-          this.imgList = []
-          this.showImgList = []
-          this.sharpImgList = []
-          this.rate = 1
-          this.rateOnce = false
-          this.isSharping = false
-          this.allDone = false
-          setTimeout(() => {
-            this.isImgSave = false
-          }, 3000);
+    handleImgBack() {
+      this.showImgList = this.showImgList.map((img, i) => {
+        return {
+          name: img.name,
+          path: img.path,
+          info: this.imgList[i].info,
+          color: '',
+        }
+      })
+      this.sharpImgList = []
+      this.allDone = false
+    },
+    resetData() {
+      this.imgList = []
+      this.showImgList = []
+      this.sharpImgList = []
+      this.rate = 1
+      this.rateOnce = false
+      this.isSharping = false
+      this.allDone = false
+      setTimeout(() => {
+        this.isImgSave = false
+      }, 3000)
     },
     rateInit() {
       let width = this.imgList[0].info.width
