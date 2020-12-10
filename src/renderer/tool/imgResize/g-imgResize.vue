@@ -156,7 +156,7 @@ export default {
                 width: Number(this.width),
                 height: Number(this.height),
                 fit: 'contain',
-                backround: { r: 0, g: 0, b: 0, alpha: 0 },
+                background: '#ffffff',
               })
               .jpeg({
                 quality: Number((this.compress / 2).toFixed(0)),
@@ -259,7 +259,13 @@ export default {
       this.rate = (width / height).toFixed(3)
     },
     closeImg(i) {
-      this.imgList.splice(i, 1)
+      if (this.imgList[i]) {
+        this.imgList.splice(i, 1)
+      }
+      if (this.sharpImgList) {
+        this.sharpImgList.splice(i, 1)
+      }
+      this.showImgList.splice(i, 1)
     },
     infoImg(i) {},
     widthInput() {

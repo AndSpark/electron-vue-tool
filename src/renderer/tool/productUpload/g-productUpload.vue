@@ -2,17 +2,16 @@
 #g-productUpload
   v-container
     v-row
-      v-btn 打开文件夹
+      v-btn(@click="readDir") 打开文件夹
     v-sheet.my-5.mx-n5
       v-treeview(
         v-model="tree"
         :open="initiallyOpen"
-        :items="items"
+        :items="itemss"
         activatable
         item-key="name"
         open-on-click
         transition
-        @update:active="show"
       )
         template(v-slot:prepend="{item,open}")
           v-icon(v-if="!item.file").
@@ -22,12 +21,26 @@
 </template>
 
 <script>
+import path from 'path'
+import sqlite from '@/tool/productUpload/lib/sqlite'
+import { readFiles } from '@/tool/productUpload/lib/utils/file'
+import { remote } from 'electron'
+import { parse } from 'querystring'
 export default {
   name: 'g-productUpload',
   components: {},
   props: {},
   data() {
     return {
+      info: {
+        sitename: '',
+        sitePath: '',
+        siteImgPath: '',
+        siteDBPath: '',
+        categoryList: [],
+        pcode: '',
+        fileName: '',
+      },
       initiallyOpen: ['public'],
       files: {
         html: 'mdi-language-html5',
@@ -86,12 +99,53 @@ export default {
           file: 'txt',
         },
       ],
+      itemss: [],
     }
   },
   computed: {},
   methods: {
-    show(arr) {
-      console.log(arr)
+    readDir() {
+      let [dirPath] = remote.dialog.showOpenDialogSync(
+        remote.getCurrentWindow(),
+        {
+          properties: ['openDirectory'],
+        }
+      )
+      let dirs = []
+      let files = []
+      readFiles(
+        dirPath,
+        (file) => {
+          files.push(file)
+        },
+        (dir) => {
+          dirs.push(dir)
+        }
+      )
+      dirs
+        .filter((v) => {
+          let { name, dir } = path.parse(v)
+          if (dir === dirPath) {
+            this.itemss.push({
+              name,
+              path: dir + '\\' + name,
+            })
+            return false
+          }
+          return true
+        })
+        .forEach((v) => {
+          let { name, dir } = path.parse(v)
+          let dir1 = this.itemss.find((v) => {
+            return v.path === dir
+          })
+          console.log(dir1)
+          if (dir1) {
+            dir1.children = []
+            dir1.children.push({ name, path: dir + name })
+          }
+        })
+      console.log(this.itemss)
     },
   },
 }
